@@ -32,14 +32,19 @@ jobs:
       MYSQL_VERSION: '5.7'
       MMSOURCE_VERSION: '1.12'
     steps:
+      - uses: actions/checkout@v6
+        with:
+          path: sourcemod
+
       - name: Configure git for private submodule
         run: |
           git config --global url."https://${{ secrets.PRIVATE_SP_REPO_TOKEN }}@github.com/SCP-076/".insteadOf "https://github.com/SCP-076/"
 
-      - uses: actions/checkout@v6
-        with:
-          submodules: recursive
-          path: sourcemod
+      - name: Init submodules
+        working-directory: sourcemod
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive
 
       # Largely a workaround for issue where github.workspace doesn't match $GITHUB_WORKSPACE
       # in containerized jobs. See https://github.com/actions/runner/issues/2058

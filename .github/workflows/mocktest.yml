@@ -5,15 +5,20 @@ jobs:
   mock:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v6
+        name: Clone sourcemod
+        with:
+          path: sourcemod
+
       - name: Configure git for private submodule
         run: |
           git config --global url."https://${{ secrets.PRIVATE_SP_REPO_TOKEN }}@github.com/SCP-076/".insteadOf "https://github.com/SCP-076/"
 
-      - uses: actions/checkout@v6
-        name: Clone sourcemod
-        with:
-          submodules: recursive
-          path: sourcemod
+      - name: Init submodules
+        working-directory: sourcemod
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive
       
       - uses: actions/checkout@v6
         name: Clone metamod-source

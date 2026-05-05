@@ -34,16 +34,21 @@ jobs:
     container:
       image: ${{ matrix.container_image }}
     steps:
-      - name: Configure git for private submodule
-        run: |
-          git config --global url."https://${{ secrets.PRIVATE_SP_REPO_TOKEN }}@github.com/SCP-076/".insteadOf "https://github.com/SCP-076/"
-
       - name: Checkout SourceMod
         uses: actions/checkout@v6
         with:
           path: sourcemod
           fetch-depth: 0
-          submodules: recursive
+
+      - name: Configure git for private submodule
+        run: |
+          git config --global url."https://${{ secrets.PRIVATE_SP_REPO_TOKEN }}@github.com/SCP-076/".insteadOf "https://github.com/SCP-076/"
+
+      - name: Init submodules
+        working-directory: sourcemod
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive
       
       - name: Install Windows dependencies
         if: startsWith(matrix.os, 'windows')

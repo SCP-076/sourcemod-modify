@@ -16,13 +16,16 @@ jobs:
     env:
       ARCH: x86,x86_64
     steps:
+      - uses: actions/checkout@v6
+
       - name: Configure git for private submodule
         run: |
           git config --global url."https://${{ secrets.PRIVATE_SP_REPO_TOKEN }}@github.com/SCP-076/".insteadOf "https://github.com/SCP-076/"
 
-      - uses: actions/checkout@v6
-        with:
-          submodules: recursive
+      - name: Init submodules
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive
 
       # Setup Python for AMBuild
       - uses: actions/setup-python@v6
