@@ -116,16 +116,11 @@ jobs:
       - name: Build
         working-directory: sourcemod
         shell: bash
-        env:
-          BREAKPAD_SYMBOL_SERVER: ${{ vars.BREAKPAD_SYMBOL_SERVER }}
-          BREAKPAD_SYMBOL_SERVER_TOKEN: ${{ secrets.BREAKPAD_SYMBOL_SERVER_TOKEN }}
         run: |
           mkdir build
           cd build
           python3 ../configure.py \
             --enable-optimize \
-            --breakpad-dump \
-            --symbol-files \
             --sdks=${{ join(fromJson(steps.sdk_list.outputs.sdk_list), ',') }} \
             --targets=${{ env.ARCH }} \
             '--mms-path=${{ steps.path_helper.outputs.dependencies }}/mmsource-${{ env.MMSOURCE_VERSION }}' \
