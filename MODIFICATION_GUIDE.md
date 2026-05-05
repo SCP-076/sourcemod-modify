@@ -15,7 +15,7 @@
 | 5 | spcomp 容器镜像改为手动触发 | `.github/workflows/build-spcomp.yml` | 不需要自动推送容器镜像 |
 | 6 | PR 检查仅构建 L4D2 | `.github/workflows/pr-checks.yml` | 减少 CI 耗时 |
 | 7 | mock 测试改为手动触发 | `.github/workflows/mocktest.yml` | 仅 L4D2 不需要自动 mock 测试 |
-| 8 | 添加私有仓库认证 | `build-release.yml`、`scripting.yml`、`pr-checks.yml`、`mocktest.yml` | 让 Actions 能拉取私有 SP 仓库 |
+| 8 | 添加私有仓库认证 + 手动子模块拉取 | `build-release.yml`、`scripting.yml`、`pr-checks.yml`、`mocktest.yml` | 让 Actions 能拉取私有 SP 仓库（需先 checkout 再配 token 再手动拉子模块，因 `actions/checkout` 会覆盖 `url.insteadOf`） |
 
 ---
 
@@ -198,5 +198,8 @@
 1. **Token 过期：** Fine-grained PAT 有过期时间，过期后需要重新生成并更新 Secret
 2. **SP 仓库改名：** 如果 `SCP-076/spp` 改名或换分支，需要同步修改 `.gitmodules` 中 `url` 和 `branch` 字段以及各 workflow 中 git config 的 `insteadOf` URL
 3. **本地子模块同步：** 修改 `.gitmodules` 后，本地执行 `git submodule sync && git submodule update --init --recursive` 生效
+4. **SDK 变更：** 如果以后需要支持更多游戏，修改 `build-release.yml` 中 `sdk_list` 的输出和 `pr-checks.yml` 中 `SDKS` 环境变量
+5. **版本号：** `product.version` 文件控制基础版本号（当前 `1.13.0`），每次发版前可按需更新
+6. **为什么子模块要手动拉取：** `actions/checkout@v6` 的 `submodules: recursive` 会在拉取前执行 `git config --global --unset-all url.*.insteadOf` 清除我们配置的 token 替换规则，然后用 `GITHUB_TOKEN`（无私有仓库权限）去拉取。因此必须改为：先 checkout（不带 submodules）→ 配置 token → 手动 `git submodule update --init`
 4. **SDK 变更：** 如果以后需要支持更多游戏，修改 `build-release.yml` 中 `sdk_list` 的输出和 `pr-checks.yml` 中 `SDKS` 环境变量
 5. **版本号：** `product.version` 文件控制基础版本号（当前 `1.13.0`），每次发版前可按需更新
