@@ -14,7 +14,8 @@
 | 4 | 脚本工具链编译改为手动触发 | `.github/workflows/scripting.yml` | 配合私有 SP 仓库，按需编译 |
 | 5 | spcomp 容器镜像改为手动触发 | `.github/workflows/build-spcomp.yml` | 不需要自动推送容器镜像 |
 | 6 | PR 检查仅构建 L4D2 | `.github/workflows/pr-checks.yml` | 减少 CI 耗时 |
-| 7 | 添加私有仓库认证 | `build-release.yml`、`scripting.yml`、`pr-checks.yml` | 让 Actions 能拉取私有 SP 仓库 |
+| 7 | mock 测试改为手动触发 | `.github/workflows/mocktest.yml` | 仅 L4D2 不需要自动 mock 测试 |
+| 8 | 添加私有仓库认证 | `build-release.yml`、`scripting.yml`、`pr-checks.yml`、`mocktest.yml` | 让 Actions 能拉取私有 SP 仓库 |
 
 ---
 
@@ -125,6 +126,23 @@
 | 私有仓库认证 | 无 | checkout 前配置 git token |
 
 **触发方式未变：** 仍然是 PR 时自动触发，不需要手动操作。
+
+---
+
+### 2.6 `.github/workflows/mocktest.yml` — hl2sdk-mock 测试
+
+**作用：** 使用 mock（模拟）SDK 进行不依赖真实游戏引擎的自动化测试。
+
+**修改内容：**
+
+| 修改项 | 旧值 | 新值 |
+|--------|------|------|
+| 触发方式 | `push` + `pull_request` | 仅 `workflow_dispatch` 手动触发 |
+| 私有仓库认证 | 无 | checkout 前配置 git token |
+
+**何时使用：**
+- 一般**不需要**使用（仅 L4D2 不需要 mock 测试）
+- 如果以后需要运行不依赖真实引擎的 SourceMod 单元测试时手动触发
 
 ---
 
