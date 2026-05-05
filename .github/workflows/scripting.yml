@@ -1,15 +1,6 @@
 name: SourcePawn scripting
 on: 
-  push:
-    branches:
-      - master
-      - '[0-9]+.[0-9]+-dev'
-    paths:
-      - 'plugins/include/*'
-      - 'sourcepawn/**'
   workflow_dispatch:
-  schedule:
-    - cron: '53 05 01 */3 *' # Artifacts expire every 3 months
 jobs:
   build:
     strategy:
@@ -25,6 +16,10 @@ jobs:
     env:
       ARCH: x86,x86_64
     steps:
+      - name: Configure git for private submodule
+        run: |
+          git config --global url."https://${{ secrets.PRIVATE_SP_REPO_TOKEN }}@github.com/SCP-076/".insteadOf "https://github.com/SCP-076/"
+
       - uses: actions/checkout@v6
         with:
           submodules: recursive
