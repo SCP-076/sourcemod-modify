@@ -31,7 +31,7 @@ jobs:
         run: |
           git submodule update --init sourcepawn
           cd sourcepawn
-          git fetch origin spp-dev
+          git fetch origin refs/heads/spp-dev:refs/remotes/origin/spp-dev
           cd ..
           git submodule update --remote sourcepawn
 

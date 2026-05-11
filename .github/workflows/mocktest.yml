@@ -20,7 +20,7 @@ jobs:
           git submodule sync --recursive
           git submodule update --init --recursive
           cd sourcepawn
-          git fetch origin spp-dev
+          git fetch origin refs/heads/spp-dev:refs/remotes/origin/spp-dev
           cd ..
           git submodule update --remote sourcepawn
       
