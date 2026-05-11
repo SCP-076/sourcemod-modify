@@ -21,8 +21,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          submodules: recursive
+
+      - name: Configure git for private submodule
+        run: |
+          git config --global url."https://${{ secrets.PRIVATE_SP_REPO_TOKEN }}@github.com/SCP-076/".insteadOf "https://github.com/SCP-076/"
+
+      - name: Init submodules
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive
+          git submodule update --remote sourcepawn
 
       - name: Log in to the Container registry
         if: github.event_name != 'pull_request'
