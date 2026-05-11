@@ -27,15 +27,24 @@ jobs:
       image: ${{ matrix.container_image }}
     name: ${{ matrix.os_short }}
     env:
-      SDKS: '["episode1","css","tf2","l4d2","csgo","dods"]'
+      SDKS: '["l4d2"]'
       ARCH: x86,x86_64
       MYSQL_VERSION: '5.7'
       MMSOURCE_VERSION: '1.12'
     steps:
       - uses: actions/checkout@v6
         with:
-          submodules: recursive
           path: sourcemod
+
+      - name: Configure git for private submodule
+        run: |
+          git config --global url."https://${{ secrets.PRIVATE_SP_REPO_TOKEN }}@github.com/SCP-076/".insteadOf "https://github.com/SCP-076/"
+
+      - name: Init submodules
+        working-directory: sourcemod
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive
 
       # Largely a workaround for issue where github.workspace doesn't match $GITHUB_WORKSPACE
       # in containerized jobs. See https://github.com/actions/runner/issues/2058

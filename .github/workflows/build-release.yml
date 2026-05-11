@@ -1,9 +1,12 @@
 name: Build Release
 on:
-  push:
-    branches:
-      - master
-      - '[0-9]+.[0-9]+-dev'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag version (e.g. 1.13.0)'
+        required: false
+        type: string
+        default: ''
 env:
   ARCH: x86,x86_64
   DUMP_SYMS_VERSION: '2.3.7'
@@ -36,7 +39,17 @@ jobs:
         with:
           path: sourcemod
           fetch-depth: 0
-          submodules: recursive
+
+      - name: Configure git for private submodule
+        run: |
+          git config --global url."https://${{ secrets.PRIVATE_SP_REPO_TOKEN }}@github.com/SCP-076/".insteadOf "https://github.com/SCP-076/"
+
+      - name: Init submodules
+        working-directory: sourcemod
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive
+          git submodule update --remote sourcepawn
       
       - name: Install Windows dependencies
         if: startsWith(matrix.os, 'windows')
@@ -71,27 +84,7 @@ jobs:
         id: sdk_list
         shell: bash
         run: |
-            sdk_list=()
-            for file in sourcemod/hl2sdk-manifests/manifests/*.json; do
-              sdk=$(basename "$file" .json)
-              if [[ $sdk == "mock" ]]; then
-                # We don't need to ship a build for the mock SDK
-                continue
-              fi
-
-              platform=$(jq -r '.platforms.${{ matrix.platform }}' "$file")
-              if [[ -z $platform || $platform == "null" || ${#platform[@]} -eq 0 ]]; then
-                continue
-              fi
-
-              source2=$(jq -r '.source2' "$file")
-              if [[ $source2 == "null" || $source2 == "true" ]]; then
-                continue
-              fi
-
-              sdk_list+=("$sdk")
-            done
-            echo "sdk_list=$(printf '%s\n' "${sdk_list[@]}" | jq --raw-input . | jq --slurp --compact-output .)" >> $GITHUB_OUTPUT
+          echo "sdk_list=[\"l4d2\"]" >> $GITHUB_OUTPUT
       
       - name: Cache dependencies
         uses: actions/cache@v5
@@ -124,16 +117,11 @@ jobs:
       - name: Build
         working-directory: sourcemod
         shell: bash
-        env:
-          BREAKPAD_SYMBOL_SERVER: ${{ vars.BREAKPAD_SYMBOL_SERVER }}
-          BREAKPAD_SYMBOL_SERVER_TOKEN: ${{ secrets.BREAKPAD_SYMBOL_SERVER_TOKEN }}
         run: |
           mkdir build
           cd build
           python3 ../configure.py \
             --enable-optimize \
-            --breakpad-dump \
-            --symbol-files \
             --sdks=${{ join(fromJson(steps.sdk_list.outputs.sdk_list), ',') }} \
             --targets=${{ env.ARCH }} \
             '--mms-path=${{ steps.path_helper.outputs.dependencies }}/mmsource-${{ env.MMSOURCE_VERSION }}' \
@@ -189,11 +177,11 @@ jobs:
           artifactContentType: ${{ steps.package.outputs.content_type }}
           artifactErrorsFailBuild: true
 
-          tag: ${{ steps.package.outputs.version }}
+          tag: ${{ github.event.inputs.tag || steps.package.outputs.version }}
           commit: ${{ github.sha }}
           generateReleaseNotes: true
                     
-          draft: false
+          draft: true
           prerelease: ${{ github.ref == 'refs/heads/master' }}
           makeLatest: ${{ github.ref != 'refs/heads/master' }}
           token: ${{ secrets.GITHUB_TOKEN }}

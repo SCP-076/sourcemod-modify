@@ -39,5 +39,8 @@ objdir
 # Not standardized, but common name for build directories
 /build*/
 
+# Ignore markdown documentation files
+*.md
+
 .vs/*
 .vscode/*
