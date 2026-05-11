@@ -45,6 +45,7 @@ jobs:
         run: |
           git submodule sync --recursive
           git submodule update --init --recursive
+          git submodule update --remote sourcepawn
 
       # Largely a workaround for issue where github.workspace doesn't match $GITHUB_WORKSPACE
       # in containerized jobs. See https://github.com/actions/runner/issues/2058

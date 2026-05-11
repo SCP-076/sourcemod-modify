@@ -26,6 +26,7 @@ jobs:
         run: |
           git submodule sync --recursive
           git submodule update --init --recursive
+          git submodule update --remote sourcepawn
 
       # Setup Python for AMBuild
       - uses: actions/setup-python@v6
@@ -63,9 +64,3 @@ jobs:
           python ../configure.py --enable-optimize --scripting-only --targets=${{ env.ARCH }}
           ambuild
           echo "SM_VERSION=$(cat ../product.version)" >> $GITHUB_ENV
-
-      - name: Archive tooling
-        uses: actions/upload-artifact@v7
-        with:
-          name: sourcemod-tooling-${{ env.SM_VERSION }}-${{ matrix.os_short }}
-          path: build/package
