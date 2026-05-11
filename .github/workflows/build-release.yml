@@ -49,6 +49,9 @@ jobs:
         run: |
           git submodule sync --recursive
           git submodule update --init --recursive
+          cd sourcepawn
+          git fetch origin spp-dev
+          cd ..
           git submodule update --remote sourcepawn
       
       - name: Install Windows dependencies

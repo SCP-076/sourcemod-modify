@@ -27,9 +27,13 @@ jobs:
         run: |
           git submodule sync sourcepawn
 
-      - name: Update sourcepawn to latest spp-dev
+      - name: Init and update sourcepawn to latest spp-dev
         run: |
-          git submodule update --init --remote sourcepawn
+          git submodule update --init sourcepawn
+          cd sourcepawn
+          git fetch origin spp-dev
+          cd ..
+          git submodule update --remote sourcepawn
 
       - name: Check for changes
         id: check
